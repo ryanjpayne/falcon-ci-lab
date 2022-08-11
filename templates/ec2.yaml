@@ -115,6 +115,9 @@ Resources:
             #Get cloud-utils tool
             printf "\nInstall cloud-utils\n"
             apt-get -y install cloud-utils
+            #Get Region
+            az=$(ec2metadata --availability-zone)
+            region=$"`echo \"$az\" | sed 's/[a-z]$//'`"
             #Copy Jenkins url and pw to secretManager
             printf "\nCopy Jenkins URL and Admin password to Secrets Manager\n"
             now=$(date +'%Y%m%d%H%M%S')
@@ -123,7 +126,7 @@ Resources:
             secretDescription=$myIp:8080
             secretValue=$(cat /var/lib/jenkins/secrets/initialAdminPassword)
             aws secretsmanager create-secret \
-              --region us-east-1 \
+              --region $region \
               --name $secretName \
               --description $secretDescription \
               --secret-string $secretValue

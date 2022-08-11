@@ -11,24 +11,21 @@ env_up(){
     EC2_AVAIL_ZONE=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone`
     REGION_CODE="`echo \"$EC2_AVAIL_ZONE\" | sed 's/[a-z]$//'`"
     cd /home/ec2-user
-    mkdir s3bucket
-    unzip -d s3bucket s3bucket.zip
     aws s3api create-bucket --bucket $BUCKET_NAME --region $REGION_CODE --create-bucket-configuration LocationConstraint=$REGION_CODE
-    cd s3bucket
-    aws s3 cp . s3://$BUCKET_NAME --recursive
+    aws s3 cp templates/ s3://$BUCKET_NAME --recursive
     echo -e "$LB\n"
     echo -e "Standing up environment$NC"
-    aws cloudformation create-stack --stack-name cwp-demo-stack --template-url https://$BUCKET_NAME.s3-$REGION_CODE.amazonaws.com/cwp-lab-entrypoint.yaml --parameters  ParameterKey=FalconClientID,ParameterValue=$CLIENT_ID ParameterKey=FalconClientSecret,ParameterValue=$CLIENT_SECRET ParameterKey=S3Bucket,ParameterValue=$BUCKET_NAME ParameterKey=CrowdStrikeCloud,ParameterValue=$CS_CLOUD  ParameterKey=FalconCID,ParameterValue="${CS_CID}" --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND --region $REGION_CODE
+    aws cloudformation create-stack --stack-name falcon-ci-lab-stack --template-url https://$BUCKET_NAME.s3-$REGION_CODE.amazonaws.com/cwp-lab-entrypoint.yaml --parameters  ParameterKey=FalconClientID,ParameterValue=$CLIENT_ID ParameterKey=FalconClientSecret,ParameterValue=$CLIENT_SECRET ParameterKey=S3Bucket,ParameterValue=$BUCKET_NAME ParameterKey=CrowdStrikeCloud,ParameterValue=$CS_CLOUD  ParameterKey=FalconCID,ParameterValue="${CS_CID}" --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND --region $REGION_CODE
     echo -e "The Cloudformation stack will take 20-30 minutes to complete$NC"
-    echo -e "\n\nCheck the status at any time with the command \n\naws cloudformation describe-stacks --stack-name cwp-demo-stack --region $REGION_CODE$NC\n\n"
+    echo -e "\n\nCheck the status at any time with the command \n\naws cloudformation describe-stacks --stack-name falcon-ci-lab-stack --region $REGION_CODE$NC\n\n"
     sleep 5
-    id=$(aws ec2 describe-instances --region us-west-2 --filters "Name=tag:Name,Values=Startup" --query "Reservations[0].Instances[].InstanceId" --output text)
-    aws ec2 terminate-instances --region us-west-2 --instance-ids $id
+    #id=$(aws ec2 describe-instances --region $REGION_CODE --filters "Name=tag:Name,Values=Startup" --query "Reservations[0].Instances[].InstanceId" --output text)
+    #aws ec2 terminate-instances --region $REGION_CODE --instance-ids $id
 }
 env_down(){
     echo -e "$RD\n"
     echo -e "Tearing down environment$NC"
-    aws cloudformation delete-stack --stack-name horizon-demo-stack --region $REGION_CODE
+    aws cloudformation delete-stack --stack-name falcon-ci-lab-stack --region $REGION_CODE
     env_destroyed
 }
 help(){

@@ -79,13 +79,12 @@ echo 'echo -e "Welcome to the demo!\n\nUse the command \`start\` to begin."' >> 
 EC2_AVAIL_ZONE=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone`
 REGION_CODE="`echo \"$EC2_AVAIL_ZONE\" | sed 's/[a-z]$//'`"
 aws configure region $REGION_CODE
+yum -y install unzip
 cd /home/ec2-user
 wget https://github.com/ryanjpayne/falcon-ci-lab/raw/main/labpackage.zip
 unzip labpackage.zip
-mv start.sh /usr/local/bin/start
+mv scripts/start.sh /usr/local/bin/start
 chmod +x /usr/local/bin/start
-mkdir /home/ec2-user/build
-mv scripts/deploy.sh /home/ec2-user/build/deploy.sh
-chmod +x /home/ec2-user/build/deploy.sh
+chmod +x /home/ec2-user/scripts/deploy.sh
 EOF
 }
