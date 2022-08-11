@@ -1,11 +1,15 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Ubuntu Ec2 Instance with Docker and Jenkins installed'
+Description: 'IAM Resources to enable Falcon CI Lab'
 Parameters:
   AWSManagedSecretsPolicy:
     Type: String
-    Description: 'ARN of the first IAM Managed Policy to add to the role'
     Default: 'arn:aws:iam::aws:policy/SecretsManagerReadWrite'
+  PermissionsBoundary:
+    Type: String
+    Default: 'BoundaryForAdministratorAccess'
+Conditions:
+  PermissionsBoundary: !Not [ !Equals [ !Ref PermissionsBoundary, '' ] ]
 Resources:
   InstanceProfile: 
     Type: 'AWS::IAM::InstanceProfile'
