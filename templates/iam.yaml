@@ -1,0 +1,36 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Ubuntu Ec2 Instance with Docker and Jenkins installed'
+Parameters:
+  AWSManagedSecretsPolicy:
+    Type: String
+    Description: 'ARN of the first IAM Managed Policy to add to the role'
+    Default: 'arn:aws:iam::aws:policy/SecretsManagerReadWrite'
+Resources:
+  InstanceProfile: 
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: '/'
+      Roles: 
+        - 
+          Ref: InstanceRole
+  InstanceRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      PermissionsBoundary:
+        Fn::If:
+          - PermissionsBoundary
+          - !Sub 'arn:aws:iam::${AWS::AccountId}:policy/${PermissionsBoundary}'
+          - Ref: AWS::NoValue
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      ManagedPolicyArns:
+        - !Ref AWSManagedSecretsPolicy

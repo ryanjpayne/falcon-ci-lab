@@ -1,0 +1,129 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Ubuntu Ec2 Instance with Docker and Jenkins installed'
+Parameters:
+  InstanceName:
+    Type: String
+    Description: 'Name of the EC2 Instance'
+    Default: 'fal.con-dockerJenkins'
+  KeyName:
+    Type: String
+    Description: 'Name of the SSH Key Pair'
+    Default: 'cs-key'
+  InstanceType:
+    Type: String
+    Description: 'Instance Type'
+    Default: 't2.micro'
+  RemoteIp:
+    Type: String
+    Description: 'IP Address to Allow-List for SSH and 8080 (Jenkins)'
+    Default: 0.0.0.0/32
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+  UbuntuAMI:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Description: 'Get latest Ubuntu AMI'
+    Default: /aws/service/canonical/ubuntu/server/focal/stable/current/amd64/hvm/ebs-gp2/ami-id
+Resources:
+  EIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      InstanceId: !Ref EC2Instance
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: allow connections from specified CIDR ranges
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 8080
+        ToPort: 8080
+        CidrIp: !Ref RemoteIp
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: !Ref RemoteIp
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref UbuntuAMI
+      KeyName: !Ref KeyName
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref InstanceProfile
+      SecurityGroups:
+      - !Ref SecurityGroup
+      BlockDeviceMappings:
+      -
+        DeviceName: /dev/sda1
+        Ebs:
+          VolumeSize: 30
+      Tags: 
+        - Key: 'Name'
+          Value: !Ref InstanceName
+      UserData:
+        Fn::Base64: 
+          !Sub |
+            #!/bin/bash
+            #Log UserData Actions
+            printf "\nLogging all output to /var/log/cloud-init-output.log and home dir\n"
+            output: {all: '| tee -a /var/log/cloud-init-output.log'}
+            #Install AWS CLI
+            printf "\nInstall AWS CLI\n"
+            apt-get update
+            apt-get install awscli -y
+            aws --version
+            #Install Java JRE and JDK
+            printf "\nInstall Default Java JRE and JDK\n"
+            apt update
+            apt install default-jre -y
+            apt install default-jdk -y
+            printf "\nVerify versions of Java JRE and JDK\n"
+            java -version
+            javac -version
+            #Install Docker
+            printf "\nInstall Docker prerequisites, Docker GPG key\n"
+            apt-get install \
+                ca-certificates \
+                curl \
+                gnupg \
+                lsb-release
+            mkdir -p /etc/apt/keyrings
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+            echo \
+              "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+              $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+            apt-get update
+            printf "\nInstall docker-ce, docker-ce-cli, containerd.io and docker-compose-plugin\n"
+            apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
+            printf "\nVerify Docker installation\n"
+            docker run hello-world
+            printf "\nPull images from DockerHub\n"
+            #docker pull vulnerables/web-dvwa
+            #docker pull imageName
+            #Install Jenkins
+            printf "\nInstall Jenkins\n"
+            wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | apt-key add -
+            sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+            apt update
+            apt install jenkins -y
+            printf "\n## Jenkins Admin Password ##\n"
+            cat /var/lib/jenkins/secrets/initialAdminPassword
+            #Give Jenkins User Docker Access
+            printf "\nCreate Docker Group and add ubuntu, jenkins users\n"
+            usermod -aG docker ubuntu
+            usermod -aG docker jenkins
+            newgrp docker
+            chmod 777 /var/run/docker.sock
+            #Get cloud-utils tool
+            printf "\nInstall cloud-utils\n"
+            apt-get -y install cloud-utils
+            #Copy Jenkins url and pw to secretManager
+            printf "\nCopy Jenkins URL and Admin password to Secrets Manager\n"
+            now=$(date +'%Y%m%d%H%M%S')
+            secretName=jenkins-$now
+            myIp=$(ec2metadata --public-ipv4)
+            secretDescription=$myIp:8080
+            secretValue=$(cat /var/lib/jenkins/secrets/initialAdminPassword)
+            aws secretsmanager create-secret \
+              --region us-east-1 \
+              --name $secretName \
+              --description $secretDescription \
+              --secret-string $secretValue
