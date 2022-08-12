@@ -85,6 +85,6 @@ cd /home/ec2-user
 git clone https://github.com/ryanjpayne/falcon-ci-lab.git
 mv falcon-ci-lab/scripts/start.sh /usr/local/bin/start
 chmod +x /usr/local/bin/start
-chmod +x /home/ec2-user/flacon-ci-lab/scripts/deploy.sh
+chmod +x /home/ec2-user/falcon-ci-lab/scripts/deploy.sh
 EOF
 }
