@@ -38,7 +38,7 @@ Resources:
     Type: AWS::EC2::EIP
     Properties:
       InstanceId: !Ref JenkinsAgent
-  SecurityGroup:
+  JenkinsSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: allow connections from specified CIDR ranges
@@ -51,10 +51,17 @@ Resources:
         FromPort: 22
         ToPort: 22
         CidrIp: !Ref RemoteIp
-      - IpProtocol: tcp
-        FromPort: 0
-        ToPort: 65535
-        SourceSecurityGroupName: !Ref SecurityGroup
+  InboundRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 0
+      ToPort: 65535
+      SourceSecurityGroupId: !Ref JenkinsSG
+      GroupId:
+        Fn::GetAtt:
+          - JenkinsSG
+          - GroupId
   JenkinsPrimary:
     Type: AWS::EC2::Instance
     Properties:
@@ -63,7 +70,7 @@ Resources:
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref InstanceProfile
       SecurityGroups:
-      - !Ref SecurityGroup
+      - !Ref JenkinsSG
       BlockDeviceMappings:
       -
         DeviceName: /dev/sda1
@@ -144,57 +151,57 @@ Resources:
               --name $secretName \
               --description $secretDescription \
               --secret-string $secretValue
-    JenkinsAgent:
-      Type: AWS::EC2::Instance
-      Properties:
-        ImageId: !Ref UbuntuAMI
-        KeyName: !Ref KeyName
-        InstanceType: !Ref InstanceType
-        IamInstanceProfile: !Ref InstanceProfile
-        SecurityGroups:
-        - !Ref SecurityGroup
-        BlockDeviceMappings:
-        -
-          DeviceName: /dev/sda1
-          Ebs:
-            VolumeSize: 30
-        Tags: 
-          - Key: 'Name'
-            Value: !Ref AgentInstanceName
-        UserData:
-          Fn::Base64: 
-            !Sub |
-              #!/bin/bash
-              #Log UserData Actions
-              printf "\nLogging all output to /var/log/cloud-init-output.log and home dir\n"
-              output: {all: '| tee -a /var/log/cloud-init-output.log'}
-              #Install AWS CLI
-              printf "\nInstall AWS CLI\n"
-              apt-get update
-              apt-get install awscli -y
-              aws --version
-              #Install Java JRE and JDK
-              printf "\nInstall Default Java JRE and JDK\n"
-              apt update
-              apt install default-jre -y
-              apt install default-jdk -y
-              printf "\nVerify versions of Java JRE and JDK\n"
-              java -version
-              javac -version
-              #Install Docker
-              printf "\nInstall Docker prerequisites, Docker GPG key\n"
-              apt-get install \
-                  ca-certificates \
-                  curl \
-                  gnupg \
-                  lsb-release
-              mkdir -p /etc/apt/keyrings
-              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-              echo \
-                "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-                $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-              apt-get update
-              printf "\nInstall docker-ce, docker-ce-cli, containerd.io and docker-compose-plugin\n"
-              apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
-              printf "\nVerify Docker installation\n"
-              docker run hello-world
+  JenkinsAgent:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref UbuntuAMI
+      KeyName: !Ref KeyName
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref InstanceProfile
+      SecurityGroups:
+      - !Ref JenkinsSG
+      BlockDeviceMappings:
+      -
+        DeviceName: /dev/sda1
+        Ebs:
+          VolumeSize: 30
+      Tags: 
+        - Key: 'Name'
+          Value: !Ref AgentInstanceName
+      UserData:
+        Fn::Base64: 
+          !Sub |
+            #!/bin/bash
+            #Log UserData Actions
+            printf "\nLogging all output to /var/log/cloud-init-output.log and home dir\n"
+            output: {all: '| tee -a /var/log/cloud-init-output.log'}
+            #Install AWS CLI
+            printf "\nInstall AWS CLI\n"
+            apt-get update
+            apt-get install awscli -y
+            aws --version
+            #Install Java JRE and JDK
+            printf "\nInstall Default Java JRE and JDK\n"
+            apt update
+            apt install default-jre -y
+            apt install default-jdk -y
+            printf "\nVerify versions of Java JRE and JDK\n"
+            java -version
+            javac -version
+            #Install Docker
+            printf "\nInstall Docker prerequisites, Docker GPG key\n"
+            apt-get install \
+                ca-certificates \
+                curl \
+                gnupg \
+                lsb-release
+            mkdir -p /etc/apt/keyrings
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+            echo \
+              "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+              $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+            apt-get update
+            printf "\nInstall docker-ce, docker-ce-cli, containerd.io and docker-compose-plugin\n"
+            apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
+            printf "\nVerify Docker installation\n"
+            docker run hello-world
