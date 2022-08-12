@@ -76,15 +76,15 @@ echo "${var.CS_Env_Id}" > /tmp/environment.txt;
 echo "export CS_Env_Id=${var.CS_Env_Id}" >> /etc/profile
 echo "export EXT_IP=$(curl -s ipinfo.io/ip)"
 echo 'echo -e "Welcome to the demo!\n\nUse the command \`start\` to begin."' >> /etc/profile
-EC2_AVAIL_ZONE=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone`
-REGION_CODE="`echo \"$EC2_AVAIL_ZONE\" | sed 's/[a-z]$//'`"
-aws configure region $REGION_CODE
+az=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone`
+region="`echo \"$az\" | sed 's/[a-z]$//'`"
+aws configure region $region
 yum -y install unzip
+yum -y install git
 cd /home/ec2-user
-wget https://github.com/ryanjpayne/falcon-ci-lab/raw/main/labpackage.zip
-unzip labpackage.zip
-mv scripts/start.sh /usr/local/bin/start
+git clone https://github.com/ryanjpayne/falcon-ci-lab.git
+mv falcon-ci-lab/scripts/start.sh /usr/local/bin/start
 chmod +x /usr/local/bin/start
-chmod +x /home/ec2-user/scripts/deploy.sh
+chmod +x /home/ec2-user/flacon-ci-lab/scripts/deploy.sh
 EOF
 }
