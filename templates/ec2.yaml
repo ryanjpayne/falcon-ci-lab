@@ -53,11 +53,15 @@ Resources:
         CidrIp: !Ref RemoteIp
   InboundRule:
     Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: JenkinsSG
     Properties:
       IpProtocol: tcp
       FromPort: 0
       ToPort: 65535
-      SourceSecurityGroupId: !Ref JenkinsSG
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+          - JenkinsSG
+          - GroupId
       GroupId:
         Fn::GetAtt:
           - JenkinsSG
