@@ -14,18 +14,16 @@ cd /home/ec2-user
 if [[ $region = "us-east-1" ]]
 then
 aws s3api create-bucket --bucket $bucketName --region $region
+aws s3 cp templates/ s3://$bucketName --recursive
 echo -e "$LB\n"
 echo -e "Standing up environment$NC"
 aws cloudformation create-stack --stack-name falcon-ci-lab-stack --template-url https://$bucketName.s3.amazonaws.com/entry.yaml --parameters ParameterKey=S3Bucket,ParameterValue=$bucketName ParameterKey=RemoteIp,ParameterValue=$trustedIp --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND --region $region
 else
 aws s3api create-bucket --bucket $bucketName --region $region --create-bucket-configuration LocationConstraint=$region
-echo -e "$LB\n"
-echo -e "Standing up environment$NC"
-aws cloudformation create-stack --stack-name falcon-ci-lab-stack --template-url https://$bucketName.s3-$region.amazonaws.com/entry.yaml --parameters ParameterKey=S3Bucket,ParameterValue=$bucketName ParameterKey=RemoteIp,ParameterValue=$trustedIp --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND --region $region
-fi
 aws s3 cp templates/ s3://$bucketName --recursive
 echo -e "$LB\n"
 echo -e "Standing up environment$NC"
 aws cloudformation create-stack --stack-name falcon-ci-lab-stack --template-url https://$bucketName.s3-$region.amazonaws.com/entry.yaml --parameters ParameterKey=S3Bucket,ParameterValue=$bucketName ParameterKey=RemoteIp,ParameterValue=$trustedIp --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND --region $region
+fi
 echo -e "The Cloudformation stack will take 5-10 minutes to complete$NC"
 echo -e "\n\nCheck the status at any time with the command \n\naws cloudformation describe-stacks --stack-name falcon-ci-lab-stack --region $region$NC\n\n"
