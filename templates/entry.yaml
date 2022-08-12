@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Ubuntu Ec2 Instance with Docker and Jenkins installed'
+Description: 'Entry CFT to invoke nested stacks for Falcon CI Lab'
 Parameters:
   RemoteIp:
     Type: String
@@ -28,3 +28,4 @@ Resources:
       TemplateURL: !Sub 'https://${S3Bucket}.s3.amazonaws.com/ec2.yaml'
       Parameters:
         RemoteIp: !Ref RemoteIp
+        InstanceProfile: !Ref IAMStack.Outputs.InstanceProfile

@@ -1,11 +1,15 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Ubuntu Ec2 Instance with Docker and Jenkins installed'
+Description: 'Ubuntu Ec2 Instances with Java, Docker and Jenkins installed for Falcon CI Lab'
 Parameters:
-  InstanceName:
+  PrimaryInstanceName:
     Type: String
-    Description: 'Name of the EC2 Instance'
-    Default: 'falconCI-dockerJenkins'
+    Description: 'Name of the Jenkins Primary EC2 Instance'
+    Default: 'falconCI-dockerJenkins-primary'
+  AgentInstanceName:
+    Type: String
+    Description: 'Name of the Jenkins Agent EC2 Instance'
+    Default: 'falconCI-dockerJenkins-agent'
   KeyName:
     Type: String
     Description: 'Name of the SSH Key Pair'
@@ -14,6 +18,8 @@ Parameters:
     Type: String
     Description: 'Instance Type'
     Default: 't2.small'
+  InstanceProfile:
+    Type: String
   RemoteIp:
     Type: String
     Description: 'IP Address to Allow-List for SSH and 8080 (Jenkins)'
@@ -24,10 +30,14 @@ Parameters:
     Description: 'Get latest Ubuntu AMI'
     Default: /aws/service/canonical/ubuntu/server/focal/stable/current/amd64/hvm/ebs-gp2/ami-id
 Resources:
-  EIP:
+  EIP1:
     Type: AWS::EC2::EIP
     Properties:
-      InstanceId: !Ref EC2Instance
+      InstanceId: !Ref JenkinsPrimary
+  EIP2:
+    Type: AWS::EC2::EIP
+    Properties:
+      InstanceId: !Ref JenkinsAgent
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -41,7 +51,11 @@ Resources:
         FromPort: 22
         ToPort: 22
         CidrIp: !Ref RemoteIp
-  EC2Instance:
+      - IpProtocol: tcp
+        FromPort: 0
+        ToPort: 65535
+        SourceSecurityGroupName: !Ref SecurityGroup
+  JenkinsPrimary:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: !Ref UbuntuAMI
@@ -57,7 +71,7 @@ Resources:
           VolumeSize: 30
       Tags: 
         - Key: 'Name'
-          Value: !Ref InstanceName
+          Value: !Ref PrimaryInstanceName
       UserData:
         Fn::Base64: 
           !Sub |
@@ -95,7 +109,7 @@ Resources:
             apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
             printf "\nVerify Docker installation\n"
             docker run hello-world
-            printf "\nPull images from DockerHub\n"
+            #printf "\nPull images from DockerHub\n"
             #docker pull vulnerables/web-dvwa
             #docker pull imageName
             #Install Jenkins
@@ -130,3 +144,57 @@ Resources:
               --name $secretName \
               --description $secretDescription \
               --secret-string $secretValue
+    JenkinsAgent:
+      Type: AWS::EC2::Instance
+      Properties:
+        ImageId: !Ref UbuntuAMI
+        KeyName: !Ref KeyName
+        InstanceType: !Ref InstanceType
+        IamInstanceProfile: !Ref InstanceProfile
+        SecurityGroups:
+        - !Ref SecurityGroup
+        BlockDeviceMappings:
+        -
+          DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 30
+        Tags: 
+          - Key: 'Name'
+            Value: !Ref AgentInstanceName
+        UserData:
+          Fn::Base64: 
+            !Sub |
+              #!/bin/bash
+              #Log UserData Actions
+              printf "\nLogging all output to /var/log/cloud-init-output.log and home dir\n"
+              output: {all: '| tee -a /var/log/cloud-init-output.log'}
+              #Install AWS CLI
+              printf "\nInstall AWS CLI\n"
+              apt-get update
+              apt-get install awscli -y
+              aws --version
+              #Install Java JRE and JDK
+              printf "\nInstall Default Java JRE and JDK\n"
+              apt update
+              apt install default-jre -y
+              apt install default-jdk -y
+              printf "\nVerify versions of Java JRE and JDK\n"
+              java -version
+              javac -version
+              #Install Docker
+              printf "\nInstall Docker prerequisites, Docker GPG key\n"
+              apt-get install \
+                  ca-certificates \
+                  curl \
+                  gnupg \
+                  lsb-release
+              mkdir -p /etc/apt/keyrings
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+              echo \
+                "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+                $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+              apt-get update
+              printf "\nInstall docker-ce, docker-ce-cli, containerd.io and docker-compose-plugin\n"
+              apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
+              printf "\nVerify Docker installation\n"
+              docker run hello-world

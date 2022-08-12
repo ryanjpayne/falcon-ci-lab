@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'IAM Resources to enable Falcon CI Lab'
+Description: 'IAM Resources for Falcon CI Lab'
 Parameters:
   AWSManagedSecretsPolicy:
     Type: String
@@ -38,3 +38,6 @@ Resources:
       Path: /
       ManagedPolicyArns:
         - !Ref AWSManagedSecretsPolicy
+Outputs:
+  InstanceProfile:
+    Value: !Ref InstanceProfile
