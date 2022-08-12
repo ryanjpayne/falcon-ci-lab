@@ -24,6 +24,7 @@ Resources:
         PermissionsBoundary: !Ref PermissionsBoundary
   EC2Stack:
     Type: AWS::CloudFormation::Stack
+    DependsOn: IAMStack
     Properties:
       TemplateURL: !Sub 'https://${S3Bucket}.s3.amazonaws.com/ec2.yaml'
       Parameters:
