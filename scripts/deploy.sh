@@ -5,7 +5,7 @@ NC="\033[0;0m"
 LB="\033[1;34m"
 
 echo -e "$LB\n"
-read -p "Your external IP Address (for remote SSH connection, CIDR format eg. 1.1.1.1/32): " trustedIp
+read -p "Please enter your external IP Address (for remote SSH connection, CIDR format eg. 1.1.1.1/32): " trustedIp
 echo -e "Initializing environment templates$NC"
 bucketName="$(cat /tmp/environment.txt | cut -c -8 | tr _ - | tr '[:upper:]' '[:lower:]')-templatebucket"
 az=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone`
@@ -27,3 +27,6 @@ aws cloudformation create-stack --stack-name falcon-ci-lab-stack --template-url 
 fi
 echo -e "The Cloudformation stack will take 5-10 minutes to complete$NC"
 echo -e "\n\nCheck the status at any time with the command \n\naws cloudformation describe-stacks --stack-name falcon-ci-lab-stack --region $region$NC\n\n"
+echo -e "$RD\n"
+echo -e "CrowdStrike"
+echo -e "We Stop Breaches$NC"
