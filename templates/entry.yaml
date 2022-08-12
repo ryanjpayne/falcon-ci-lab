@@ -20,7 +20,6 @@ Resources:
     Properties:
       TemplateURL: !Sub 'https://${S3Bucket}.s3.amazonaws.com/iam.yaml'
       Parameters:
-        S3Bucket: !Ref S3Bucket
         PermissionsBoundary: !Ref PermissionsBoundary
   EC2Stack:
     Type: AWS::CloudFormation::Stack
@@ -29,4 +28,4 @@ Resources:
       TemplateURL: !Sub 'https://${S3Bucket}.s3.amazonaws.com/ec2.yaml'
       Parameters:
         RemoteIp: !Ref RemoteIp
-        InstanceProfile: !Ref IAMStack.Outputs.InstanceProfile
+        InstanceProfile: !GetAtt IAMStack.Outputs.InstanceProfileName

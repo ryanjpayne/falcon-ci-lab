@@ -39,5 +39,5 @@ Resources:
       ManagedPolicyArns:
         - !Ref AWSManagedSecretsPolicy
 Outputs:
-  InstanceProfile:
+  InstanceProfileName:
     Value: !Ref InstanceProfile
