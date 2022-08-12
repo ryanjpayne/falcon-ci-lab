@@ -10,7 +10,7 @@ echo -e "Initializing environment templates$NC"
 bucketName="$(cat /tmp/environment.txt | cut -c -8 | tr _ - | tr '[:upper:]' '[:lower:]')-templatebucket"
 az=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone`
 region="`echo \"$az\" | sed 's/[a-z]$//'`"
-cd /home/ec2-user
+cd /home/ec2-user/falcon-ci-lab
 if [[ $region = "us-east-1" ]]
 then
 aws s3api create-bucket --bucket $bucketName --region $region
