@@ -76,15 +76,29 @@ echo "${var.CS_Env_Id}" > /tmp/environment.txt;
 echo "export CS_Env_Id=${var.CS_Env_Id}" >> /etc/profile
 echo "export EXT_IP=$(curl -s ipinfo.io/ip)"
 echo 'echo -e "Welcome to the demo!\n\nUse the command \`start\` to begin."' >> /etc/profile
+# Set Region
 az=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone`
 region="`echo \"$az\" | sed 's/[a-z]$//'`"
-aws configure region $region
+aws configure set region $region
+# Install Prerequisites
 yum -y install unzip
 yum -y install git
+curl -O https://bootstrap.pypa.io/get-pip.py
+python3 get-pip.py --user
+pip install git-remote-codecommit
+# Clone Repos
 cd /home/ec2-user
 git clone https://github.com/ryanjpayne/falcon-ci-lab.git
+git clone https://github.com/ryanjpayne/falcon-ci-app.git
+# Chmod Start and Deploy scripts
 mv falcon-ci-lab/scripts/start.sh /usr/local/bin/start
 chmod +x /usr/local/bin/start
 chmod +x /home/ec2-user/falcon-ci-lab/scripts/deploy.sh
+# Create CodeCommit repo and push App code
+cd /falcon-ci-app
+export repoName="$(cat /tmp/environment.txt | cut -c -8 | tr _ - | tr '[:upper:]' '[:lower:]')-repo"
+export repoUrl=$(aws codecommit create-repository --repository-name $repoName --repository-description "Falcon CI App Repository" | jq -r '.repositoryMetadata.cloneUrlHttp')
+codeCommitUrl="codecommit::$region://$repoName"
+git push $codeCommitUrl --all
 EOF
 }
