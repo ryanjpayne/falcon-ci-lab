@@ -1,0 +1,20 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  RepositoryUrl:
+    Type: String
+    Description: 'HTTPS Clone URL for the CodeCommit Repository'
+  RepositoryName:
+    Type: String
+    Description: 'Repository Name'
+Resources:
+  MyIDE:
+    Type: AWS::Cloud9::EnvironmentEC2
+    Properties: 
+      AutomaticStopTimeMinutes: 30
+      ConnectionType: 'CONNECT_SSH'
+      ImageId: 'amazonlinux-2-x86_64'
+      InstanceType: 't2.micro'
+      Name: 'falconCI-cloud9'
+      Repositories: 
+      - RepositoryUrl: !Ref RepositoryUrl
+        PathComponent: !Ref PathComponent

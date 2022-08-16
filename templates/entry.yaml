@@ -12,6 +12,12 @@ Parameters:
     Default: 'BoundaryForAdministratorAccess'
   S3Bucket:
     Type: String
+  RepositoryUrl:
+    Type: String
+    Description: 'CodeCommit Repository URL'
+  RepositoryName:
+    Type: String
+    Description: 'CodeCommit Repository Name'
 Conditions:
   PermissionsBoundary: !Not [!Equals [!Ref PermissionsBoundary, '']]
 Resources:
@@ -29,3 +35,11 @@ Resources:
       Parameters:
         RemoteIp: !Ref RemoteIp
         InstanceProfile: !GetAtt IAMStack.Outputs.InstanceProfileName
+  Cloud9Stack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: IAMStack
+    Properties:
+      TemplateURL: !Sub 'https://${S3Bucket}.s3.amazonaws.com/cloud9.yaml'
+      Parameters:
+        RepositoryUrl: !Ref RepositoryUrl
+        RepositoryName: !Ref RepositoryName
