@@ -15,7 +15,7 @@ Resources:
       ImageId: 'amazonlinux-2-x86_64'
       InstanceType: 't2.micro'
       Name: 'falconCI-cloud9'
-      Owner: !Join
+      OwnerArn: !Join
           - ''
           - - 'arn:aws:iam::'
             - !Ref 'AWS::AccountId'

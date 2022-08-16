@@ -96,7 +96,7 @@ mv falcon-ci-lab/scripts/start.sh /usr/local/bin/start
 chmod +x /usr/local/bin/start
 chmod +x /home/ec2-user/falcon-ci-lab/scripts/deploy.sh
 # Create CodeCommit repo and push App code
-cd /falcon-ci-app
+cd falcon-ci-app
 export repoName="$(cat /tmp/environment.txt | cut -c -8 | tr _ - | tr '[:upper:]' '[:lower:]')-repo"
 echo $repoName > /tmp/repoName
 export repoUrl=$(aws codecommit create-repository --repository-name $repoName --repository-description "Falcon CI App Repository" | jq -r '.repositoryMetadata.cloneUrlHttp')
