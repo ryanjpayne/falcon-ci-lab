@@ -15,6 +15,11 @@ Resources:
       ImageId: 'amazonlinux-2-x86_64'
       InstanceType: 't2.micro'
       Name: 'falconCI-cloud9'
+      OwnerArn: !Join
+          - ''
+          - - 'arn:aws:iam::'
+            - !Ref 'AWS::AccountId'
+            - ':user/wus-cloudshare'
       Repositories: 
       - RepositoryUrl: !Ref RepositoryUrl
         PathComponent: !Ref RepositoryName
