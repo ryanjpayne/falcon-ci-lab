@@ -17,4 +17,4 @@ Resources:
       Name: 'falconCI-cloud9'
       Repositories: 
       - RepositoryUrl: !Ref RepositoryUrl
-        PathComponent: !Ref PathComponent
+        PathComponent: !Ref RepositoryName
