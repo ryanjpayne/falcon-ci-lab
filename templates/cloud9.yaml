@@ -16,5 +16,5 @@ Resources:
       InstanceType: 't2.micro'
       Name: 'falconCI-cloud9'
       Repositories: 
-      - RepositoryUrl: !Ref RepositoryUrl #'https://git-codecommit.us-east-1.amazonaws.com/v1/repos/en85xi69-repo'
-        PathComponent: !Ref PathComponent #'/en85xi69-repo'
+      - RepositoryUrl: !Ref RepositoryUrl
+        PathComponent: !Ref PathComponent
