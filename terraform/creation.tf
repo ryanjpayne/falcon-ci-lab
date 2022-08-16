@@ -83,6 +83,7 @@ aws configure set region $region
 # Install Prerequisites
 yum -y install unzip
 yum -y install git
+yum -y install jq
 curl -O https://bootstrap.pypa.io/get-pip.py
 python3 get-pip.py --user
 pip install git-remote-codecommit
