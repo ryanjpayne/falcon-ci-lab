@@ -10,6 +10,10 @@ Parameters:
     Type: String
     Description: 'Name of the Jenkins Agent EC2 Instance'
     Default: 'falconCI-dockerJenkins-agent'
+  BastionInstanceName:
+    Type: String
+    Description: 'Name of the Bastion EC2 Instance'
+    Default: 'windows-bastion'
   KeyName:
     Type: String
     Description: 'Name of the SSH Key Pair'
@@ -29,6 +33,10 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Description: 'Get latest Ubuntu AMI'
     Default: /aws/service/canonical/ubuntu/server/focal/stable/current/amd64/hvm/ebs-gp2/ami-id
+  WindowsAMI:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Description: 'Get latest Windows Server AMI'
+    Default: /aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base
 Resources:
   EIP1:
     Type: AWS::EC2::EIP
@@ -226,3 +234,15 @@ Resources:
             #Create Jenkins root dir
             mkdir /var/jenkins
             chmod -R 777 /var/jenkins
+  WindowsBastion:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref WindowsAMI
+      KeyName: !Ref KeyName
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref InstanceProfile
+      SecurityGroups:
+      - !Ref JenkinsSG
+      Tags: 
+        - Key: 'Name'
+          Value: !Ref BastionInstanceName
