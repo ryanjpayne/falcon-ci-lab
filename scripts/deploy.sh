@@ -12,6 +12,14 @@ az=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone`
 region="`echo \"$az\" | sed 's/[a-z]$//'`"
 repoUrl=$(cat /tmp/repoUrl)
 repoName=$(cat /tmp/repoName)
+cd /home/ec2-user
+curl -O https://bootstrap.pypa.io/get-pip.py
+python3 get-pip.py --user
+pip install git-remote-codecommit
+cd /home/ec2-user/falcon-ci-app
+git config --global --add safe.directory /home/ec2-user/falcon-ci-app
+codeCommitUrl="codecommit::$region://$repoName"
+git push $codeCommitUrl --all
 cd /home/ec2-user/falcon-ci-lab
 if [[ $region = "us-east-1" ]]
 then
