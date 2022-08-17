@@ -72,6 +72,7 @@ resource "aws_instance" "aws-linux-server" {
   }
   user_data = <<EOF
 #!/bin/bash
+printf "\nLogging all output to /var/log/cloud-init-output.log and home dir\n"
 echo "${var.CS_Env_Id}" > /tmp/environment.txt;
 echo "export CS_Env_Id=${var.CS_Env_Id}" >> /etc/profile
 echo "export EXT_IP=$(curl -s ipinfo.io/ip)"
@@ -84,9 +85,6 @@ aws configure set region $region
 yum -y install unzip
 yum -y install git
 yum -y install jq
-curl -O https://bootstrap.pypa.io/get-pip.py
-python3 get-pip.py --user
-pip install git-remote-codecommit
 # Clone Repos
 cd /home/ec2-user
 git clone https://github.com/ryanjpayne/falcon-ci-lab.git
@@ -95,13 +93,10 @@ git clone https://github.com/ryanjpayne/falcon-ci-app.git
 mv falcon-ci-lab/scripts/start.sh /usr/local/bin/start
 chmod +x /usr/local/bin/start
 chmod +x /home/ec2-user/falcon-ci-lab/scripts/deploy.sh
-# Create CodeCommit repo and push App code
-cd falcon-ci-app
+# Create CodeCommit repo
 export repoName="$(cat /tmp/environment.txt | cut -c -8 | tr _ - | tr '[:upper:]' '[:lower:]')-repo"
-echo $repoName > /tmp/repoName
 export repoUrl=$(aws codecommit create-repository --repository-name $repoName --repository-description "Falcon CI App Repository" | jq -r '.repositoryMetadata.cloneUrlHttp')
 echo $repoUrl > /tmp/repoUrl
-codeCommitUrl="codecommit::$region://$repoName"
-git push $codeCommitUrl --all
+echo $repoName > /tmp/repoName
 EOF
 }
