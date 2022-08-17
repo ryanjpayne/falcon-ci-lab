@@ -95,6 +95,13 @@ Resources:
             apt-get update
             apt-get install awscli -y
             aws --version
+            #Get cloud-utils tool
+            printf "\nInstall cloud-utils\n"
+            apt-get -y install cloud-utils
+            #Get and Set Region
+            az=$(ec2metadata --availability-zone)
+            region=$"`echo \"$az\" | sed 's/[a-z]$//'`"
+            aws configure set region $region
             #Install Java JRE and JDK
             printf "\nInstall Default Java JRE and JDK\n"
             apt update
@@ -103,6 +110,11 @@ Resources:
             printf "\nVerify versions of Java JRE and JDK\n"
             java -version
             javac -version
+            #Prep for CodeCommit Access
+            apt install git -y
+            curl -O https://bootstrap.pypa.io/get-pip.py
+            python3 get-pip.py --user
+            pip install git-remote-codecommit
             #Install Docker
             printf "\nInstall Docker prerequisites, Docker GPG key\n"
             apt-get install \
@@ -137,12 +149,6 @@ Resources:
             usermod -aG docker jenkins
             newgrp docker
             chmod 777 /var/run/docker.sock
-            #Get cloud-utils tool
-            printf "\nInstall cloud-utils\n"
-            apt-get -y install cloud-utils
-            #Get Region
-            az=$(ec2metadata --availability-zone)
-            region=$"`echo \"$az\" | sed 's/[a-z]$//'`"
             #Copy Jenkins url and pw to secretManager
             printf "\nCopy Jenkins URL and Admin password to Secrets Manager\n"
             now=$(date +'%Y%m%d%H%M%S')
@@ -150,11 +156,7 @@ Resources:
             myIp=$(ec2metadata --public-ipv4)
             secretDescription=$myIp:8080
             secretValue=$(cat /var/lib/jenkins/secrets/initialAdminPassword)
-            aws secretsmanager create-secret \
-              --region $region \
-              --name $secretName \
-              --description $secretDescription \
-              --secret-string $secretValue
+            aws secretsmanager create-secret --name $secretName --description $secretDescription --secret-string $secretValue
   JenkinsAgent:
     Type: AWS::EC2::Instance
     Properties:
@@ -184,6 +186,13 @@ Resources:
             apt-get update
             apt-get install awscli -y
             aws --version
+            #Get cloud-utils tool
+            printf "\nInstall cloud-utils\n"
+            apt-get -y install cloud-utils
+            #Get and Set Region
+            az=$(ec2metadata --availability-zone)
+            region=$"`echo \"$az\" | sed 's/[a-z]$//'`"
+            aws configure set region $region
             #Install Java JRE and JDK
             printf "\nInstall Default Java JRE and JDK\n"
             apt update
@@ -192,6 +201,11 @@ Resources:
             printf "\nVerify versions of Java JRE and JDK\n"
             java -version
             javac -version
+            #Prep for CodeCommit Access
+            apt install git -y
+            curl -O https://bootstrap.pypa.io/get-pip.py
+            python3 get-pip.py --user
+            pip install git-remote-codecommit
             #Install Docker
             printf "\nInstall Docker prerequisites, Docker GPG key\n"
             apt-get install \
