@@ -55,10 +55,6 @@ Resources:
         FromPort: 8080
         ToPort: 8080
         CidrIp: !Ref RemoteIp
-      - IpProtocol: tcp
-        FromPort: 22
-        ToPort: 22
-        CidrIp: !Ref RemoteIp
   InboundRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: JenkinsSG
