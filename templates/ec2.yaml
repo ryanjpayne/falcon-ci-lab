@@ -148,7 +148,7 @@ Resources:
             printf "\n## Jenkins Admin Password ##\n"
             cat /var/lib/jenkins/secrets/initialAdminPassword
             #Give Jenkins User Docker Access
-            printf "\nCreate Docker Group and add ubuntu, jenkins users\n"
+            printf "\nAdd ubuntu and jenkins users to Docker group\n"
             usermod -aG docker ubuntu
             usermod -aG docker jenkins
             newgrp docker
@@ -227,6 +227,11 @@ Resources:
             apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
             printf "\nVerify Docker installation\n"
             docker run hello-world
+            #Give Ubuntu User Docker Access
+            printf "\nAdd ubuntu user to Docker group\n"
+            usermod -aG docker ubuntu
+            newgrp docker
+            chmod 777 /var/run/docker.sock
             #Create Jenkins root dir
             mkdir /var/jenkins
             chmod -R 777 /var/jenkins
