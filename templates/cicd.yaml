@@ -23,3 +23,7 @@ Resources:
       Repositories: 
       - RepositoryUrl: !Ref RepositoryUrl
         PathComponent: !Ref RepositoryName
+  MyRepository: 
+    Type: AWS::ECR::Repository
+    Properties: 
+      RepositoryName: "falconCILab"
