@@ -10,6 +10,10 @@ Parameters:
     Type: String
     Description: 'Name of the Jenkins Agent EC2 Instance'
     Default: 'falconCI-dockerJenkins-agent'
+  BastionInstanceName:
+    Type: String
+    Description: 'Name of the Bastion EC2 Instance'
+    Default: 'windows-bastion'
   KeyName:
     Type: String
     Description: 'Name of the SSH Key Pair'
@@ -29,6 +33,10 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Description: 'Get latest Ubuntu AMI'
     Default: /aws/service/canonical/ubuntu/server/focal/stable/current/amd64/hvm/ebs-gp2/ami-id
+  WindowsAMI:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Description: 'Get latest Windows Server AMI'
+    Default: /aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base
 Resources:
   EIP1:
     Type: AWS::EC2::EIP
@@ -46,10 +54,6 @@ Resources:
       - IpProtocol: tcp
         FromPort: 8080
         ToPort: 8080
-        CidrIp: !Ref RemoteIp
-      - IpProtocol: tcp
-        FromPort: 22
-        ToPort: 22
         CidrIp: !Ref RemoteIp
   InboundRule:
     Type: AWS::EC2::SecurityGroupIngress
@@ -144,17 +148,22 @@ Resources:
             printf "\n## Jenkins Admin Password ##\n"
             cat /var/lib/jenkins/secrets/initialAdminPassword
             #Give Jenkins User Docker Access
-            printf "\nCreate Docker Group and add ubuntu, jenkins users\n"
+            printf "\nAdd ubuntu and jenkins users to Docker group\n"
             usermod -aG docker ubuntu
             usermod -aG docker jenkins
             newgrp docker
             chmod 777 /var/run/docker.sock
-            #Copy Jenkins url and pw to secretManager
-            printf "\nCopy Jenkins URL and Admin password to Secrets Manager\n"
+            #Write Jenkins URLs to Parameter Store
+            printf "\nWrite Jenkins URLs to Parameter Store\n"
+            publicIp=$(ec2metadata --public-ipv4)
+            localIp=$(ec2metadata --local-ipv4)
+            aws ssm put-parameter --name "Jenkins-URL-Public-Access" --type "String" --value "{$publicIp}:8080"
+            aws ssm put-parameter --name "Jenkins-URL-Private-Access" --type "String" --value "{$localIp}:8080"
+            #Write Jenkins PW to secretManager
+            printf "\nWrite Jenkins Admin password to Secrets Manager\n"
             now=$(date +'%Y%m%d%H%M%S')
-            secretName=jenkins-$now
-            myIp=$(ec2metadata --public-ipv4)
-            secretDescription=$myIp:8080
+            secretName=jenkins-$now            
+            secretDescription="Initial Jenkins Admin Password"
             secretValue=$(cat /var/lib/jenkins/secrets/initialAdminPassword)
             aws secretsmanager create-secret --name $secretName --description $secretDescription --secret-string $secretValue
   JenkinsAgent:
@@ -223,6 +232,27 @@ Resources:
             apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
             printf "\nVerify Docker installation\n"
             docker run hello-world
+            #Give Ubuntu User Docker Access
+            printf "\nAdd ubuntu user to Docker group\n"
+            usermod -aG docker ubuntu
+            newgrp docker
+            chmod 777 /var/run/docker.sock
             #Create Jenkins root dir
             mkdir /var/jenkins
             chmod -R 777 /var/jenkins
+            #Write Private IP to Parameter Store
+            printf "\nWrite Private IP to Parameter Store\n"
+            localIp=$(ec2metadata --local-ipv4)
+            aws ssm put-parameter --name "Jenkins-Agent-Private-Ip" --type "String" --value $localIp
+  WindowsBastion:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref WindowsAMI
+      KeyName: !Ref KeyName
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref InstanceProfile
+      SecurityGroups:
+      - !Ref JenkinsSG
+      Tags: 
+        - Key: 'Name'
+          Value: !Ref BastionInstanceName
