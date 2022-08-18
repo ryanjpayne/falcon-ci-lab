@@ -35,11 +35,11 @@ Resources:
       Parameters:
         RemoteIp: !Ref RemoteIp
         InstanceProfile: !GetAtt IAMStack.Outputs.InstanceProfileName
-  Cloud9Stack:
+  CICDStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: IAMStack
     Properties:
-      TemplateURL: !Sub 'https://${S3Bucket}.s3.amazonaws.com/cloud9.yaml'
+      TemplateURL: !Sub 'https://${S3Bucket}.s3.amazonaws.com/cicd.yaml'
       Parameters:
         RepositoryUrl: !Ref RepositoryUrl
         RepositoryName: !Ref RepositoryName
