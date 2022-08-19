@@ -157,15 +157,14 @@ Resources:
             printf "\nWrite Jenkins URLs to Parameter Store\n"
             publicIp=$(ec2metadata --public-ipv4)
             localIp=$(ec2metadata --local-ipv4)
-            aws ssm put-parameter --name "Jenkins-URL-Public-Access" --type "String" --value "{$publicIp}:8080"
-            aws ssm put-parameter --name "Jenkins-URL-Private-Access" --type "String" --value "{$localIp}:8080"
+            aws ssm put-parameter --name "Jenkins-URL-Public-Access" --type "String" --value "$publicIp:8080"
+            aws ssm put-parameter --name "Jenkins-URL-Private-Access" --type "String" --value "$localIp:8080"
             #Write Jenkins PW to secretManager
             printf "\nWrite Jenkins Admin password to Secrets Manager\n"
             now=$(date +'%Y%m%d%H%M%S')
-            secretName=jenkins-$now            
-            secretDescription="Initial Jenkins Admin Password"
+            secretName=jenkins-$now
             secretValue=$(cat /var/lib/jenkins/secrets/initialAdminPassword)
-            aws secretsmanager create-secret --name $secretName --description $secretDescription --secret-string $secretValue
+            aws secretsmanager create-secret --name $secretName --secret-string $secretValue --description "Initial Jenkins Admin Password"
   JenkinsAgent:
     Type: AWS::EC2::Instance
     Properties:
