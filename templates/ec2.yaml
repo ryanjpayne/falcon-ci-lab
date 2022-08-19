@@ -92,7 +92,7 @@ Resources:
           !Sub |
             #!/bin/bash
             #Log UserData Actions
-            printf "\nLogging all output to /var/log/cloud-init-output.log and home dir\n"
+            printf "\nLogging all output to /var/log/cloud-init-output.log\n"
             output: {all: '| tee -a /var/log/cloud-init-output.log'}
             #Install AWS CLI
             printf "\nInstall AWS CLI\n"
@@ -188,7 +188,7 @@ Resources:
           !Sub |
             #!/bin/bash
             #Log UserData Actions
-            printf "\nLogging all output to /var/log/cloud-init-output.log and home dir\n"
+            printf "\nLogging all output to /var/log/cloud-init-output.log\n"
             output: {all: '| tee -a /var/log/cloud-init-output.log'}
             #Install AWS CLI
             printf "\nInstall AWS CLI\n"

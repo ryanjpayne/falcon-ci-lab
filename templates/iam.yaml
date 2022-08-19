@@ -2,9 +2,9 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'IAM Resources for Falcon CI Lab'
 Parameters:
-  AWSManagedSecretsPolicy:
+  AWSAdminPolicy:
     Type: String
-    Default: 'arn:aws:iam::aws:policy/SecretsManagerReadWrite'
+    Default: 'arn:aws:iam::aws:policy/AdministratorAccess'
   PermissionsBoundary:
     Type: String
     Default: 'BoundaryForAdministratorAccess'
@@ -37,7 +37,7 @@ Resources:
               - 'sts:AssumeRole'
       Path: /
       ManagedPolicyArns:
-        - !Ref AWSManagedSecretsPolicy
+        - !Ref AWSAdminPolicy
 Outputs:
   InstanceProfileName:
     Value: !Ref InstanceProfile
