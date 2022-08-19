@@ -1,4 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
+Description: 'Cloud9 IDE environment and Elastic Container Registry repository for Falcon CI Lab'
 Parameters:
   RepositoryUrl:
     Type: String
