@@ -37,6 +37,18 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Description: 'Get latest Windows Server AMI'
     Default: /aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base
+  PublicSubnet1:
+    Type: String
+    Description: Public Subnet ID from VPCStack
+  PublicSubnet2:
+    Type: String
+    Description: Public Subnet ID from VPCStack
+  PrivateSubnet1:
+    Type: String
+    Description: Private Subnet ID from VPCStack
+  PrivateSubnet2:
+    Type: String
+    Description: Private Subnet ID from VPCStack
 Resources:
   EIP1:
     Type: AWS::EC2::EIP
@@ -77,6 +89,7 @@ Resources:
       KeyName: !Ref KeyName
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref InstanceProfile
+      SubnetId: !Ref PublicSubnet1
       SecurityGroups:
       - !Ref JenkinsSG
       BlockDeviceMappings:
@@ -172,6 +185,7 @@ Resources:
       KeyName: !Ref KeyName
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref InstanceProfile
+      SubnetId: !Ref PrivateSubnet1
       SecurityGroups:
       - !Ref JenkinsSG
       BlockDeviceMappings:
@@ -250,6 +264,7 @@ Resources:
       KeyName: !Ref KeyName
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref InstanceProfile
+      SubnetId: !Ref PublicSubnet1
       SecurityGroups:
       - !Ref JenkinsSG
       Tags: 
