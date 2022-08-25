@@ -54,3 +54,4 @@ Resources:
       Parameters:
         RepositoryUrl: !Ref RepositoryUrl
         RepositoryName: !Ref RepositoryName
+        PublicSubnet1: !GetAtt VPCStack.Outputs.SubnetPublic1
