@@ -94,8 +94,8 @@ Resources:
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref InstanceProfile
       SubnetId: !Ref PublicSubnet1
-      SecurityGroups:
-      - !Ref JenkinsSG
+      SecurityGroupIds:
+      - !GetAtt JenkinsSG.GroupId
       BlockDeviceMappings:
       -
         DeviceName: /dev/sda1
@@ -190,8 +190,8 @@ Resources:
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref InstanceProfile
       SubnetId: !Ref PrivateSubnet1
-      SecurityGroups:
-      - !Ref JenkinsSG
+      SecurityGroupIds:
+      - !GetAtt JenkinsSG.GroupId
       BlockDeviceMappings:
       -
         DeviceName: /dev/sda1
@@ -269,8 +269,8 @@ Resources:
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref InstanceProfile
       SubnetId: !Ref PublicSubnet1
-      SecurityGroups:
-      - !Ref JenkinsSG
+      SecurityGroupIds:
+      - !GetAtt JenkinsSG.GroupId
       Tags: 
         - Key: 'Name'
           Value: !Ref BastionInstanceName
