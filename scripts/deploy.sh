@@ -10,6 +10,7 @@ echo -e "Initializing environment templates$NC"
 bucketName="$(cat /tmp/environment.txt | cut -c -8 | tr _ - | tr '[:upper:]' '[:lower:]')-templatebucket"
 az=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone`
 region="`echo \"$az\" | sed 's/[a-z]$//'`"
+instanceId=`curl -s http://169.254.169.254/latest/meta-data/instance-id`
 repoUrl=$(cat /tmp/repoUrl)
 repoName=$(cat /tmp/repoName)
 cd /home/ec2-user
@@ -40,3 +41,4 @@ echo -e "\n\nCheck the status at any time with the command \n\naws cloudformatio
 echo -e "$RD\n"
 echo -e "CrowdStrike"
 echo -e "We Stop Breaches$NC"
+aws ec2 terminate-instances --region $region --instance-ids $instanceId

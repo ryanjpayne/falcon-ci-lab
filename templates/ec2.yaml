@@ -37,6 +37,21 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Description: 'Get latest Windows Server AMI'
     Default: /aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base
+  VpcId:
+    Type: String
+    Description: VPC ID from VPCStack
+  PublicSubnet1:
+    Type: String
+    Description: Public Subnet ID from VPCStack
+  PublicSubnet2:
+    Type: String
+    Description: Public Subnet ID from VPCStack
+  PrivateSubnet1:
+    Type: String
+    Description: Private Subnet ID from VPCStack
+  PrivateSubnet2:
+    Type: String
+    Description: Private Subnet ID from VPCStack
 Resources:
   EIP1:
     Type: AWS::EC2::EIP
@@ -50,6 +65,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: allow connections from specified CIDR ranges
+      VpcId: !Ref VpcId
       SecurityGroupIngress:
       - IpProtocol: tcp
         FromPort: 8080
@@ -77,8 +93,9 @@ Resources:
       KeyName: !Ref KeyName
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref InstanceProfile
-      SecurityGroups:
-      - !Ref JenkinsSG
+      SubnetId: !Ref PublicSubnet1
+      SecurityGroupIds:
+      - !GetAtt JenkinsSG.GroupId
       BlockDeviceMappings:
       -
         DeviceName: /dev/sda1
@@ -172,8 +189,9 @@ Resources:
       KeyName: !Ref KeyName
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref InstanceProfile
-      SecurityGroups:
-      - !Ref JenkinsSG
+      SubnetId: !Ref PrivateSubnet1
+      SecurityGroupIds:
+      - !GetAtt JenkinsSG.GroupId
       BlockDeviceMappings:
       -
         DeviceName: /dev/sda1
@@ -250,8 +268,9 @@ Resources:
       KeyName: !Ref KeyName
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref InstanceProfile
-      SecurityGroups:
-      - !Ref JenkinsSG
+      SubnetId: !Ref PublicSubnet1
+      SecurityGroupIds:
+      - !GetAtt JenkinsSG.GroupId
       Tags: 
         - Key: 'Name'
           Value: !Ref BastionInstanceName
