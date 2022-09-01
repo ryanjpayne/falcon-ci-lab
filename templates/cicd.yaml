@@ -7,6 +7,9 @@ Parameters:
   RepositoryName:
     Type: String
     Description: 'Repository Name'
+  PublicSubnet1:
+    Type: String
+    Description: Public Subnet ID from VPCStack
 Resources:
   MyIDE:
     Type: AWS::Cloud9::EnvironmentEC2
@@ -15,6 +18,7 @@ Resources:
       ConnectionType: 'CONNECT_SSH'
       ImageId: 'amazonlinux-2-x86_64'
       InstanceType: 't2.micro'
+      SubnetId: !Ref PublicSubnet1
       Name: 'falconCI-cloud9'
       OwnerArn: !Join
           - ''

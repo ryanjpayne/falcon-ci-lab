@@ -24,11 +24,6 @@ Parameters:
     Default: 't2.small'
   InstanceProfile:
     Type: String
-  RemoteIp:
-    Type: String
-    Description: 'IP Address to Allow-List for SSH and 8080 (Jenkins)'
-    Default: 1.1.1.1/32
-    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
   UbuntuAMI:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Description: 'Get latest Ubuntu AMI'
@@ -70,7 +65,7 @@ Resources:
       - IpProtocol: tcp
         FromPort: 8080
         ToPort: 8080
-        CidrIp: !Ref RemoteIp
+        CidrIp: 10.0.0.0/16
   InboundRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: JenkinsSG
