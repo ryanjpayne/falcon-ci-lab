@@ -2,11 +2,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'Entry CFT to invoke nested stacks for Falcon CI Lab'
 Parameters:
-  RemoteIp:
-    Type: String
-    Description: 'IP Address to Allow-List for remote SSH and 8080 (Jenkins)'
-    Default: 1.1.1.1/32
-    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
   PermissionsBoundary:
     Type: String
     Default: 'BoundaryForAdministratorAccess'
@@ -39,7 +34,6 @@ Resources:
     Properties:
       TemplateURL: !Sub 'https://${S3Bucket}.s3.amazonaws.com/ec2.yaml'
       Parameters:
-        RemoteIp: !Ref RemoteIp
         InstanceProfile: !GetAtt IAMStack.Outputs.InstanceProfileName
         VpcId: !GetAtt VPCStack.Outputs.VpcId
         PublicSubnet1: !GetAtt VPCStack.Outputs.SubnetPublic1
