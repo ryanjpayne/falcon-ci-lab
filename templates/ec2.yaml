@@ -167,10 +167,8 @@ Resources:
             chmod 777 /var/run/docker.sock
             #Write Jenkins URLs to Parameter Store
             printf "\nWrite Jenkins URLs to Parameter Store\n"
-            publicIp=$(ec2metadata --public-ipv4)
             localIp=$(ec2metadata --local-ipv4)
-            aws ssm put-parameter --name "Jenkins-URL-Public-Access" --type "String" --value "$publicIp:8080"
-            aws ssm put-parameter --name "Jenkins-URL-Private-Access" --type "String" --value "$localIp:8080"
+            aws ssm put-parameter --name "Jenkins-URL" --type "String" --value "$localIp:8080"
             #Write Jenkins PW to secretManager
             printf "\nWrite Jenkins Admin password to Secrets Manager\n"
             now=$(date +'%Y%m%d%H%M%S')
@@ -255,7 +253,7 @@ Resources:
             #Write Private IP to Parameter Store
             printf "\nWrite Private IP to Parameter Store\n"
             localIp=$(ec2metadata --local-ipv4)
-            aws ssm put-parameter --name "Jenkins-Agent-Private-Ip" --type "String" --value $localIp
+            aws ssm put-parameter --name "Jenkins-Agent-Ip" --type "String" --value $localIp
   WindowsBastion:
     Type: AWS::EC2::Instance
     Properties:
