@@ -2,11 +2,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'Creates a VPC for the Jenkins Lab'
 Parameters:
-
-  PermissionsBoundary:
-    Type: String
-    Default: ''
-
   VPCCIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16–28
@@ -39,9 +34,6 @@ Parameters:
     Description: CIDR block for the public (DMZ) subnet 2, located in Availability
       Zone 2.
     Type: String
-
-Conditions:
-  PermissionsBoundary: !Not [ !Equals [ !Ref PermissionsBoundary, '' ] ]
 
 Resources:
   InternetGateway:
@@ -218,6 +210,14 @@ Resources:
       - Key: Name
         Value:
           Fn::Sub: "Falcon-CI-Lab-VPC"
+      - Key: cstag-business
+        Value: Sales
+      - Key: cstag-accounting
+        Value: dev
+      - Key: cstag-department
+        Value: Sales - 310000
+      - Key: cstag-owner
+        Value: ryan.payne
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
@@ -225,47 +225,6 @@ Resources:
         Ref: InternetGateway
       VpcId:
         Ref: VPC
-  FlowLogRole:
-    Type: 'AWS::IAM::Role'
-    Properties:
-      PermissionsBoundary:
-        Fn::If:
-          - PermissionsBoundary
-          - !Sub 'arn:aws:iam::${AWS::AccountId}:policy/${PermissionsBoundary}'
-          - Ref: AWS::NoValue
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: 'vpc-flow-logs.amazonaws.com'
-            Action: 'sts:AssumeRole'
-      Policies:
-        - PolicyName: 'flowlogs-policy'
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'logs:CreateLogGroup'
-                  - 'logs:CreateLogStream'
-                  - 'logs:PutLogEvents'
-                  - 'logs:DescribeLogGroups'
-                  - 'logs:DescribeLogStreams'
-                Resource: !GetAtt 'LogGroup.Arn'
-  LogGroup:
-    Type: 'AWS::Logs::LogGroup'
-    Properties:
-      LogGroupName: !Join [ '', [ !Ref 'AWS::StackName', '-vpc-flow-log' ] ]
-      RetentionInDays: 1
-  FlowLog:
-    Type: 'AWS::EC2::FlowLog'
-    Properties:
-      DeliverLogsPermissionArn: !GetAtt 'FlowLogRole.Arn'
-      LogGroupName: !Join [ '', [ !Ref 'AWS::StackName', '-vpc-flow-log' ] ]
-      ResourceId: !Ref VPC
-      ResourceType: 'VPC'
-      TrafficType: 'ALL'
 
 Outputs:
   VpcId:

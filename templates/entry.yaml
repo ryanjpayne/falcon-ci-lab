@@ -2,32 +2,25 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'Entry CFT to invoke nested stacks for Falcon CI Lab'
 Parameters:
-  PermissionsBoundary:
-    Type: String
-    Default: 'BoundaryForAdministratorAccess'
   S3Bucket:
     Type: String
   RepositoryUrl:
     Type: String
     Description: 'CodeCommit Repository URL'
+    Default: "https://git-codecommit.us-west-2.amazonaws.com/v1/repos/cs-jenkins-demo"
   RepositoryName:
     Type: String
     Description: 'CodeCommit Repository Name'
-Conditions:
-  PermissionsBoundary: !Not [!Equals [!Ref PermissionsBoundary, '']]
+    Default: "cs-jenkins-demo"
 Resources:
   IAMStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub 'https://${S3Bucket}.s3.amazonaws.com/iam.yaml'
-      Parameters:
-        PermissionsBoundary: !Ref PermissionsBoundary
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub 'https://${S3Bucket}.s3.amazonaws.com/vpc.yaml'
-      Parameters:
-        PermissionsBoundary: !Ref PermissionsBoundary
   EC2Stack:
     Type: AWS::CloudFormation::Stack
     DependsOn: IAMStack

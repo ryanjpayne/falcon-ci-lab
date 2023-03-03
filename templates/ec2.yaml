@@ -99,6 +99,14 @@ Resources:
       Tags: 
         - Key: 'Name'
           Value: !Ref PrimaryInstanceName
+        - Key: cstag-business
+          Value: Sales
+        - Key: cstag-accounting
+          Value: dev
+        - Key: cstag-department
+          Value: Sales - 310000
+        - Key: cstag-owner
+          Value: ryan.payne
       UserData:
         Fn::Base64: 
           !Sub |
@@ -193,6 +201,14 @@ Resources:
       Tags: 
         - Key: 'Name'
           Value: !Ref AgentInstanceName
+                - Key: cstag-business
+          Value: Sales
+        - Key: cstag-accounting
+          Value: dev
+        - Key: cstag-department
+          Value: Sales - 310000
+        - Key: cstag-owner
+          Value: ryan.payne
       UserData:
         Fn::Base64: 
           !Sub |
@@ -267,6 +283,14 @@ Resources:
       Tags: 
         - Key: 'Name'
           Value: !Ref BastionInstanceName
+        - Key: cstag-business
+          Value: Sales
+        - Key: cstag-accounting
+          Value: dev
+        - Key: cstag-department
+          Value: Sales - 310000
+        - Key: cstag-owner
+          Value: ryan.payne
       UserData:
         Fn::Base64: 
           !Sub |
