@@ -21,10 +21,27 @@ Resources:
                 - ec2.amazonaws.com
             Action:
               - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: parameterStore
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - 'ssm:PutParameter'
+                  - 'ssm:DeleteParameter'
+                  - 'ssm:GetParameterHistory'
+                  - 'ssm:GetParametersByPath'
+                  - 'ssm:GetParameters'
+                  - 'ssm:GetParameter'
+                  - 'ssm:DeleteParameters'
+                  - 'ssm:DescribeParameters'
+                Resource: '*'
       Path: /
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
         - arn:aws:iam::517716713836:policy/FalconContainerEcrPull
+        - arn:aws:iam::aws:policy/SecretsManagerReadWrite
 Outputs:
   InstanceProfileName:
     Value: !Ref InstanceProfile

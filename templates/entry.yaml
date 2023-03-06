@@ -4,6 +4,10 @@ Description: 'Entry CFT to invoke nested stacks for Falcon CI Lab'
 Parameters:
   S3Bucket:
     Type: String
+  KeyName:
+    Type: String
+    Description: 'Name of the SSH Key Pair'
+    Default: 'rp-solar-ca'
   RepositoryUrl:
     Type: String
     Description: 'CodeCommit Repository URL'
@@ -29,6 +33,7 @@ Resources:
       Parameters:
         InstanceProfile: !GetAtt IAMStack.Outputs.InstanceProfileName
         VpcId: !GetAtt VPCStack.Outputs.VpcId
+        KeyName: !Ref KeyName
         PublicSubnet1: !GetAtt VPCStack.Outputs.SubnetPublic1
         PublicSubnet2: !GetAtt VPCStack.Outputs.SubnetPublic2
         PrivateSubnet1: !GetAtt VPCStack.Outputs.SubnetPrivate1
@@ -39,6 +44,4 @@ Resources:
     Properties:
       TemplateURL: !Sub 'https://${S3Bucket}.s3.amazonaws.com/cicd.yaml'
       Parameters:
-        RepositoryUrl: !Ref RepositoryUrl
         RepositoryName: !Ref RepositoryName
-        PublicSubnet1: !GetAtt VPCStack.Outputs.SubnetPublic1

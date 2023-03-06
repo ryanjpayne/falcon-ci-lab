@@ -17,7 +17,7 @@ Parameters:
   KeyName:
     Type: String
     Description: 'Name of the SSH Key Pair'
-    Default: 'cs-key'
+    Default: ''
   InstanceType:
     Type: String
     Description: 'Instance Type'
@@ -201,7 +201,7 @@ Resources:
       Tags: 
         - Key: 'Name'
           Value: !Ref AgentInstanceName
-                - Key: cstag-business
+        - Key: cstag-business
           Value: Sales
         - Key: cstag-accounting
           Value: dev

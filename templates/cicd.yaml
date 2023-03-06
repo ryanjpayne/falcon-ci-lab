@@ -1,34 +1,11 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: 'Cloud9 IDE environment and Elastic Container Registry repository for Falcon CI Lab'
 Parameters:
-  RepositoryUrl:
-    Type: String
-    Description: 'HTTPS Clone URL for the CodeCommit Repository'
   RepositoryName:
     Type: String
-    Description: 'Repository Name'
-  PublicSubnet1:
-    Type: String
-    Description: Public Subnet ID from VPCStack
+    Description: 'cs-jenkins-demo'
 Resources:
-  MyIDE:
-    Type: AWS::Cloud9::EnvironmentEC2
-    Properties: 
-      AutomaticStopTimeMinutes: 30
-      ConnectionType: 'CONNECT_SSH'
-      ImageId: 'amazonlinux-2-x86_64'
-      InstanceType: 't2.micro'
-      SubnetId: !Ref PublicSubnet1
-      Name: 'falconCI-cloud9'
-      OwnerArn: !Join
-          - ''
-          - - 'arn:aws:iam::'
-            - !Ref 'AWS::AccountId'
-            - ':user/wus-cloudshare'
-      Repositories: 
-      - RepositoryUrl: !Ref RepositoryUrl
-        PathComponent: !Ref RepositoryName
   MyRepository: 
     Type: AWS::ECR::Repository
     Properties: 
-      RepositoryName: "falconcilab"
+      RepositoryName: !Ref RepositoryName
