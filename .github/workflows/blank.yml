@@ -7,7 +7,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: foo
-        uses: ryanjpayne/action-test@v3
+        uses: ryanjpayne/action-test@v4
         with:
           target-directory: './'
           output-directory: './.crowdstrike/'
