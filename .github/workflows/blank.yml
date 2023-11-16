@@ -1,0 +1,13 @@
+on: [push]
+
+jobs:
+  cs-iac-action:
+    runs-on: ubuntu-latest
+    name: Scan Iac Files with CrowdStrike
+    steps:
+      - uses: actions/checkout@v4
+      - id: foo
+        uses: actions/cloud-iac-scan-action@v1
+        with:
+          target-directory: './'
+          output-directory: './.crowdstrike/'
